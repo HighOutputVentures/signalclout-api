@@ -3,6 +3,8 @@ This project is a work in progress. API keys which provides higher throughput wi
 
 This GraphQL API is compliant to the [Relay GraphQL Server Specification](https://relay.dev/docs/guides/graphql-server-specification/).
 
+The GraphQL schema and documentation can be found at https://api.signalclout.com/graphql.
+
 # Search profiles by keyword
 Profiles can be searched given one or more keywords. These keywords are matched against the username, public key and profile description.
 ### Query
@@ -47,6 +49,55 @@ query (first: Int, $search: [String!]) {
 curl --location --request POST 'https://api.signalclout.com/graphql' \
 --header 'Content-Type: application/json' \
 --data-raw '{"query":"query ($first: Int, $search: [String!]) {\n  profiles(first: $first, search: $search) {\n    totalCount\n    edges {\n      node {\n        id\n        publicKey\n        username\n        image\n        description\n        hidden\n        verified\n        reserved\n        creatorBasisPoints\n        balanceNanos\n        bitcloutLockedNanos\n        coinsInCirculationNanos\n        coinPriceBitCloutNanos\n        coinPriceUSD\n        walletPriceUSD\n        followersCount\n        followingCount\n      }\n      cursor\n    }\n  }\n}","variables":{"first":10,"search":["entrepreneur"]}}'
+```
+# Filter profiles
+Profiles may be filtered in many different ways. To retrieve profiles with coin prices less than $50, we use the `coinPriceBitCloutNanos` filter. Given the BitClout price is $170.40, the corresponding `coinPriceBitCloutNanos` is `293427230`.
+### Query
+```graphql
+query ($first: Int, $filter: ProfileFilterInput) {
+  profiles(first: $first, filter: $filter) {
+    totalCount
+    edges {
+      node {
+        id
+        publicKey
+        username
+        image
+        description
+        hidden
+        verified
+        reserved
+        creatorBasisPoints
+        balanceNanos
+        bitcloutLockedNanos
+        coinsInCirculationNanos
+        coinPriceBitCloutNanos
+        coinPriceUSD
+        walletPriceUSD
+        followersCount
+        followingCount
+      }
+      cursor
+    }
+  }
+}
+```
+### Variables
+```json
+{
+    "first": 10,
+    "filter": {
+        "coinPriceBitCloutNanos": {
+            "lt": 293427230
+        }
+    }
+}
+```
+### Example cURL request
+```bash
+curl --location --request POST 'https://api.signalclout.com/graphql' \
+--header 'Content-Type: application/json' \
+--data-raw '{"query":"query ($first: Int, $filter: ProfileFilterInput) {\n  profiles(first: $first, filter: $filter) {\n    totalCount\n    edges {\n      node {\n        id\n        publicKey\n        username\n        image\n        description\n        hidden\n        verified\n        reserved\n        creatorBasisPoints\n        balanceNanos\n        bitcloutLockedNanos\n        coinsInCirculationNanos\n        coinPriceBitCloutNanos\n        coinPriceUSD\n        walletPriceUSD\n        followersCount\n        followingCount\n      }\n      cursor\n    }\n  }\n}","variables":{"first":10,"filter":{"coinPriceBitCloutNanos":{"lt":293427230}}}}'
 ```
 # Retrieve profile
 ### Query
